@@ -36,6 +36,23 @@ class UsersMixin:
         else:
             return False
 
+    def authenticate_sms(self, sms_code, code, remote_addr):
+        data = {
+            'code': code,
+            'sms_code': sms_code,
+            'remote_addr': remote_addr
+        }
+
+        try:
+            resp = self.http.post('user-sms-auth', data=data, use_auth=False)
+        except (ResponseError, RequestError):
+            return False
+
+        if resp.status_code == 200:
+            return True
+        else:
+            return False
+
     def authenticate(self, username, password="", public_key="",
                      remote_addr="", login_type='T'):
         data = {
@@ -56,8 +73,9 @@ class UsersMixin:
             return {'user': user, 'token': token}
         elif resp.status_code == 300:
             user = User.from_json(resp.json()["user"])
-            seed = resp.json()["seed"]
-            return {'user': user, 'seed': seed}
+            seed = resp.json().get('seed', None)
+            sms_code = resp.json().get('sms_code', None)
+            return {'user': user, 'seed': seed, 'sms_code': sms_code}
         else:
             return dict()
 
