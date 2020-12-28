@@ -69,6 +69,7 @@ class Asset(Decoder):
     comment = ""
     platform = "Linux"
     domain = ""
+    alias_names = []
     _system_users_name_list = None
 
     @classmethod
